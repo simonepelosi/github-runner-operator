@@ -53,13 +53,23 @@ apt-get install -y \
   python3 \
   socat
 
+install_or_refresh() {
+  package=$1
+  shift
+  if snap list "$package" > /dev/null 2>&1; then
+    snap refresh "$package" "$@"
+  else
+    snap install "$package" "$@"
+  fi
+}
+
 snap refresh snapd
-snap refresh lxd
-snap install sourcecraft --edge --classic
-snap install rockcraft --edge --classic
-snap install charmcraft --edge --classic
-snap install snapcraft --edge --classic
-snap install builder-agent --beta --classic
+install_or_refresh lxd
+install_or_refresh sourcecraft --edge --classic
+install_or_refresh rockcraft --edge --classic
+install_or_refresh charmcraft --edge --classic
+install_or_refresh snapcraft --edge --classic
+install_or_refresh builder-agent --beta --classic
 
 lxd init --auto
 
