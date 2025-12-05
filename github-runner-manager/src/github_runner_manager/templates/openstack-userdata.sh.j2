@@ -5,9 +5,13 @@ set -e
 hostnamectl set-hostname github-runner
 
 # Write .env contents
+mkdir -p /home/ubuntu/actions-runner
+chown ubuntu:ubuntu /home/ubuntu/actions-runner
 su - ubuntu -c 'cd ~/actions-runner && echo "{{ env_contents }}" > .env'
 
-snap refresh --hold=48h
+# Hold the snap packages to prevent automatic updates
+# this is important to not confuse fetch service
+snap refresh --hold
 snap watch --last=auto-refresh?
 
 {% if use_aproxy %}
@@ -58,9 +62,6 @@ snap install snapcraft --edge --classic
 snap install builder-agent --beta --classic
 
 lxd init --auto
-# Hold the snap packages to prevent automatic updates
-# this is important to not confuse fetch service
-snap refresh --hold
 
 {% if ssh_debug_info and runner_proxy_config and runner_proxy_config.proxy_address %}
 # The tmate-proxy service will be started by the canonical/action-tmate if necessary.
