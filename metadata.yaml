@@ -1,7 +1,7 @@
 # Copyright 2025 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-name: github-runner
+name: lp-github-runner
 display-name: GitHub runner
 maintainers:
   - https://launchpad.net/~canonical-is-devops
