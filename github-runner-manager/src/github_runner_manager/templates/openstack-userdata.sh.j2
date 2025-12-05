@@ -39,6 +39,29 @@ nft -f /etc/nftables.conf
 
 apt-get update
 
+# Install deps for Job Farm
+apt-get install -y \
+  curl \
+  bash \
+  sudo \
+  build-essential \
+  git \
+  python3 \
+  socat
+
+snap refresh snapd
+snap refresh lxd
+snap install sourcecraft --edge --classic
+snap install rockcraft --edge --classic
+snap install charmcraft --edge --classic
+snap install snapcraft --edge --classic
+snap install builder-agent --beta --classic
+
+lxd init --auto
+# Hold the snap packages to prevent automatic updates
+# this is important to not confuse fetch service
+snap refresh --hold
+
 {% if ssh_debug_info and runner_proxy_config and runner_proxy_config.proxy_address %}
 # The tmate-proxy service will be started by the canonical/action-tmate if necessary.
 cat << EOF > /etc/systemd/system/tmate-proxy.service

@@ -29,6 +29,9 @@ from charm_state import (
     MAX_TOTAL_VIRTUAL_MACHINES_CONFIG_NAME,
     OPENSTACK_CLOUDS_YAML_CONFIG_NAME,
     OPENSTACK_FLAVOR_CONFIG_NAME,
+    OPENSTACK_IMAGE_ID_CONFIG_NAME,
+    OPENSTACK_IMAGE_TAGS_CONFIG_NAME,
+    OPENSTACK_NETWORK_CONFIG_NAME,
     PATH_CONFIG_NAME,
     RECONCILE_INTERVAL_CONFIG_NAME,
     RUNNER_HTTP_PROXY_CONFIG_NAME,
@@ -513,6 +516,53 @@ def test_openstack_image_from_charm():
         unit_mock: {
             "id": (test_id := "test-id"),
             "tags": ",".join(test_tags := ["tag1", "tag2"]),
+        }
+    }
+    mock_charm.model.relations[IMAGE_INTEGRATION_NAME] = [relation_mock]
+
+    image = OpenstackImage.from_charm(mock_charm)
+
+    assert isinstance(image, OpenstackImage)
+    assert image.id == test_id
+    assert image.tags == test_tags
+
+
+def test_openstack_image_from_charm_config():
+    """
+    arrange: Mock CharmBase instance with no relation but with config.
+    act: Call OpenstackImage.from_charm method.
+    assert: Verify that the method returns the image info from config.
+    """
+    mock_charm = MockGithubRunnerCharmFactory()
+    mock_charm.model.relations[IMAGE_INTEGRATION_NAME] = []
+    mock_charm.config[OPENSTACK_IMAGE_ID_CONFIG_NAME] = (test_id := "config-id")
+    mock_charm.config[OPENSTACK_IMAGE_TAGS_CONFIG_NAME] = (test_tags_str := "tag1, tag2")
+
+    image = OpenstackImage.from_charm(mock_charm)
+
+    assert isinstance(image, OpenstackImage)
+    assert image.id == test_id
+    assert image.tags == [tag.strip() for tag in test_tags_str.split(",")]
+
+
+def test_openstack_image_from_charm_relation_precedence():
+    """
+    arrange: Mock CharmBase instance with both relation and config.
+    act: Call OpenstackImage.from_charm method.
+    assert: Verify that the method returns the image info from relation (precedence).
+    """
+    mock_charm = MockGithubRunnerCharmFactory()
+    # Config setup
+    mock_charm.config[OPENSTACK_IMAGE_ID_CONFIG_NAME] = "config-id"
+    mock_charm.config[OPENSTACK_IMAGE_TAGS_CONFIG_NAME] = "config-tag"
+    # Relation setup
+    relation_mock = MagicMock()
+    unit_mock = MagicMock()
+    relation_mock.units = [unit_mock]
+    relation_mock.data = {
+        unit_mock: {
+            "id": (test_id := "relation-id"),
+            "tags": ",".join(test_tags := ["relation-tag"]),
         }
     }
     mock_charm.model.relations[IMAGE_INTEGRATION_NAME] = [relation_mock]

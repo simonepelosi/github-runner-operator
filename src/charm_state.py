@@ -46,6 +46,8 @@ MANAGER_SSH_PROXY_COMMAND_CONFIG_NAME = "manager-ssh-proxy-command"
 OPENSTACK_CLOUDS_YAML_CONFIG_NAME = "openstack-clouds-yaml"
 OPENSTACK_NETWORK_CONFIG_NAME = "openstack-network"
 OPENSTACK_FLAVOR_CONFIG_NAME = "openstack-flavor"
+OPENSTACK_IMAGE_ID_CONFIG_NAME = "openstack-image-id"
+OPENSTACK_IMAGE_TAGS_CONFIG_NAME = "openstack-image-tags"
 PATH_CONFIG_NAME = "path"
 RECONCILE_INTERVAL_CONFIG_NAME = "reconcile-interval"
 # bandit thinks this is a hardcoded password
@@ -613,17 +615,27 @@ class OpenstackImage(BaseModel):
             OpenstackImage metadata from charm relation data.
         """
         relations = charm.model.relations[IMAGE_INTEGRATION_NAME]
-        if not relations or not (relation := relations[0]).units:
-            return None
-        for unit in relation.units:
-            relation_data = relation.data[unit]
-            if not relation_data:
-                continue
+        if relations and (relation := relations[0]).units:
+            for unit in relation.units:
+                relation_data = relation.data[unit]
+                if not relation_data:
+                    continue
+                return OpenstackImage(
+                    id=relation_data.get("id", None),
+                    tags=[tag.strip() for tag in relation_data.get("tags", "").split(",") if tag],
+                )
+            return OpenstackImage(id=None, tags=None)
+
+        image_id = charm.config.get(OPENSTACK_IMAGE_ID_CONFIG_NAME)
+        image_tags = charm.config.get(OPENSTACK_IMAGE_TAGS_CONFIG_NAME)
+
+        if image_id or image_tags:
             return OpenstackImage(
-                id=relation_data.get("id", None),
-                tags=[tag.strip() for tag in relation_data.get("tags", "").split(",") if tag],
+                id=cast(str, image_id) or None,
+                tags=[tag.strip() for tag in image_tags.split(",") if tag.strip()] if image_tags else [],
             )
-        return OpenstackImage(id=None, tags=None)
+
+        return None
 
 
 class OpenstackRunnerConfig(BaseModel):

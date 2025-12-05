@@ -32,6 +32,18 @@ options:
       application to be able to access the virtual machine though the IP assigned by the openstack
       network. See docs for details:
       (https://docs.openstack.org/neutron/latest/admin/intro-os-networking.html).
+  openstack-image-id:
+    type: string
+    default: ""
+    description: >-
+      The OpenStack image ID to use for the runners. This config is used as a fallback if the
+      image-integration relation is not available or does not provide the image ID.
+  openstack-image-tags:
+    type: string
+    default: ""
+    description: >-
+      Comma-separated list of tags for the OpenStack image. This config is used as a fallback if the
+      image-integration relation is not available or does not provide the image tags.
   experimental-use-aproxy:
     type: boolean
     default: false
