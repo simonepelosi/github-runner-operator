@@ -664,6 +664,11 @@ def _get_vms_to_cleanup(*, vms: Sequence[VM], runner_ids: list[str]) -> set[Inst
     """
     vms_without_runner_ids = set(vm.instance_id for vm in vms if not vm.metadata.runner_id)
     logger.debug("VMs without platform runner ID metadata:\n%s", vms_without_runner_ids)
+
+    error_vms = set(vm.instance_id for vm in vms if vm.state == VMState.ERROR)
+    if error_vms:
+        logger.info("VMs in error state:\n%s", error_vms)
+
     vms_with_deleted_runners = set(
         vm.instance_id
         for vm in vms
@@ -671,4 +676,4 @@ def _get_vms_to_cleanup(*, vms: Sequence[VM], runner_ids: list[str]) -> set[Inst
     )
     logger.debug("VMs with deleted platform runners:\n%s", vms_with_deleted_runners)
 
-    return vms_without_runner_ids | vms_with_deleted_runners
+    return vms_without_runner_ids | vms_with_deleted_runners | error_vms

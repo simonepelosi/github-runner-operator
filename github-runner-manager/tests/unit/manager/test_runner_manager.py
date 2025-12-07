@@ -174,6 +174,15 @@ def test_flush_runners(
             [runner_with_platform, runner_without_platform],
             id="some in cloud, some not in cloud",
         ),
+        pytest.param(
+            [],
+            [
+                error_vm := CloudRunnerInstanceFactory(state=VMState.ERROR),
+             ],
+            [],
+            [], # Expect it to be cleaned up
+            id="cloud runner in error state",
+        ),
     ],
 )
 def test_runner_manager_cleanup(
