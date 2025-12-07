@@ -85,6 +85,8 @@ class VMState(str, Enum):
                 state = VMState.ERROR
             case "STOPPED":
                 state = VMState.STOPPED
+            case "SHUTOFF":
+                state = VMState.STOPPED
             case "DELETED":
                 state = VMState.DELETED
             case "UNKNOWN":
