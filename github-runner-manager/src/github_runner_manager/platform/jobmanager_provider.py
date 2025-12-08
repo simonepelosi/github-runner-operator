@@ -167,6 +167,7 @@ class JobManagerPlatform(PlatformProvider):
         """
         try:
             response = self._jobmanager_api.register_runner(name=instance_id.name, labels=labels)
+            logger.info("Register runner response: %s", response)
             jobmanager_base_url = self._jobmanager_api.url.rstrip("/")
             updated_metadata = RunnerMetadata(
                 platform_name=metadata.platform_name, url=jobmanager_base_url

@@ -28,6 +28,11 @@ snap set system proxy.https="{{ proxy_url }}"
 echo "Snapd proxy configured"
 {% endif %}
 
+# If no proxy_url print a message
+{% if not proxy_url %}
+echo "No proxy_url provided, skipping proxy configuration"
+{% endif %}
+
 hostnamectl set-hostname github-runner
 
 # Write .env contents
@@ -98,14 +103,6 @@ install_or_refresh snapcraft --edge --classic
 install_or_refresh builder-agent --beta --classic
 
 lxd init --auto
-
-{% if proxy_url %}
-# Configure LXD proxy
-echo "Configuring LXD proxy..."
-lxc config set core.proxy_http="{{ proxy_url }}"
-lxc config set core.proxy_https="{{ proxy_url }}"
-echo "LXD proxy configured"
-{% endif %}
 
 {% if ssh_debug_info and runner_proxy_config and runner_proxy_config.proxy_address %}
 # The tmate-proxy service will be started by the canonical/action-tmate if necessary.

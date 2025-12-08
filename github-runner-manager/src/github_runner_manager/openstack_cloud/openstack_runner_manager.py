@@ -204,6 +204,11 @@ class OpenStackRunnerManager(CloudRunnerManager):
         aproxy_exclude_ipv4_addresses = [
             address for address in service_config.aproxy_exclude_addresses if ":" not in address
         ]
+        logger.info(
+            "Generating cloud init with proxy_url: %s, proxy_certificate: %s",
+            runner_context.proxy_url,
+            "present" if runner_context.proxy_certificate else "missing",
+        )
         return jinja.get_template("openstack-userdata.sh.j2").render(
             run_script=runner_context.shell_run_script,
             env_contents=env_contents,
