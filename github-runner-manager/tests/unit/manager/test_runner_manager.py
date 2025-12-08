@@ -178,9 +178,9 @@ def test_flush_runners(
             [],
             [
                 error_vm := CloudRunnerInstanceFactory(state=VMState.ERROR),
-             ],
+            ],
             [],
-            [], # Expect it to be cleaned up
+            [],  # Expect it to be cleaned up
             id="cloud runner in error state",
         ),
     ],

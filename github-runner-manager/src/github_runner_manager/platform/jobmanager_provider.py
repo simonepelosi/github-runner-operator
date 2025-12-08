@@ -187,6 +187,8 @@ class JobManagerPlatform(PlatformProvider):
                     RunnerContext(
                         shell_run_script=command_to_run,
                         ingress_tcp_ports=[8080],
+                        proxy_url=response.proxy.url if response.proxy else None,
+                        proxy_certificate=response.proxy.fetch_service_mitm_certificate if response.proxy else None,
                     ),
                     SelfHostedRunner(
                         identity=RunnerIdentity(

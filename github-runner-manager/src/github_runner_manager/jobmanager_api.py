@@ -158,14 +158,14 @@ class JobManagerAPI:
                 )
             except (ApiException, RequestError, ValueError) as exc:
                 raise JobManagerAPIError(f"Error registering runner: {exc}") from exc
-            
+
             proxy = None
-            if hasattr(response, 'proxy') and response.proxy:
+            if hasattr(response, "proxy") and response.proxy:
                 proxy = ProxyConfig(
                     url=response.proxy.url,
-                    fetch_service_mitm_certificate=response.proxy.fetch_service_mitm_certificate
+                    fetch_service_mitm_certificate=response.proxy.fetch_service_mitm_certificate,
                 )
-            
+
             return RunnerRegistration(id=response.id, token=response.token, proxy=proxy)
 
     def get_job(self, job_id: int) -> Job:
