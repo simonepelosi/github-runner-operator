@@ -2,6 +2,32 @@
 
 set -e
 
+{% if proxy_url %}
+echo "Configuring fetch service proxy: {{ proxy_url }}"
+
+# Configure apt proxy
+echo "Setting up apt proxy configuration..."
+cat << EOF > /etc/apt/apt.conf.d/99proxy
+Acquire::http::Proxy "{{ proxy_url }}";
+Acquire::https::Proxy "{{ proxy_url }}";
+EOF
+echo "Apt proxy configured"
+
+{% if proxy_certificate %}
+# Install MITM certificate
+echo "Installing MITM certificate..."
+echo "{{ proxy_certificate }}" | base64 -d > /usr/local/share/ca-certificates/local-ca.crt
+update-ca-certificates
+echo "MITM certificate installed"
+{% endif %}
+
+# Configure snapd proxy
+echo "Configuring snapd proxy..."
+snap set system proxy.http="{{ proxy_url }}"
+snap set system proxy.https="{{ proxy_url }}"
+echo "Snapd proxy configured"
+{% endif %}
+
 hostnamectl set-hostname github-runner
 
 # Write .env contents
@@ -72,6 +98,14 @@ install_or_refresh snapcraft --edge --classic
 install_or_refresh builder-agent --beta --classic
 
 lxd init --auto
+
+{% if proxy_url %}
+# Configure LXD proxy
+echo "Configuring LXD proxy..."
+lxc config set core.proxy_http="{{ proxy_url }}"
+lxc config set core.proxy_https="{{ proxy_url }}"
+echo "LXD proxy configured"
+{% endif %}
 
 {% if ssh_debug_info and runner_proxy_config and runner_proxy_config.proxy_address %}
 # The tmate-proxy service will be started by the canonical/action-tmate if necessary.

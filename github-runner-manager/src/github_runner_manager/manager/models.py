@@ -207,7 +207,11 @@ class RunnerContext:
     Attributes:
         shell_run_script: Script to run the platform agent.
         ingress_tcp_ports: Ports to be opened in the cloud provider.
+        proxy_url: Optional proxy URL for the runner.
+        proxy_certificate: Optional base64-encoded MITM certificate.
     """
 
     shell_run_script: str
     ingress_tcp_ports: list[int] = field(default_factory=lambda: [])
+    proxy_url: str | None = None
+    proxy_certificate: str | None = None

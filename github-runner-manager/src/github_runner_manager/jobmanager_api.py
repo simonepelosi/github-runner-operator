@@ -52,16 +52,30 @@ class RunnerStatus(str, Enum):
     PENDING = "PENDING"
 
 
+class ProxyConfig(BaseModel):
+    """Proxy configuration from JobManager.
+
+    Attributes:
+        url: The proxy URL.
+        fetch_service_mitm_certificate: The MITM certificate for the fetch service.
+    """
+
+    url: str
+    fetch_service_mitm_certificate: str
+
+
 class RunnerRegistration(BaseModel):
     """Represents a runner registration response from the JobManagerAPI.
 
     Attributes:
         id: The ID of the registered runner.
         token: The token for the registered runner.
+        proxy: Optional proxy configuration.
     """
 
     id: int
     token: str
+    proxy: ProxyConfig | None = None
 
 
 class RunnerHealth(BaseModel):
@@ -144,7 +158,15 @@ class JobManagerAPI:
                 )
             except (ApiException, RequestError, ValueError) as exc:
                 raise JobManagerAPIError(f"Error registering runner: {exc}") from exc
-            return RunnerRegistration(id=response.id, token=response.token)
+            
+            proxy = None
+            if hasattr(response, 'proxy') and response.proxy:
+                proxy = ProxyConfig(
+                    url=response.proxy.url,
+                    fetch_service_mitm_certificate=response.proxy.fetch_service_mitm_certificate
+                )
+            
+            return RunnerRegistration(id=response.id, token=response.token, proxy=proxy)
 
     def get_job(self, job_id: int) -> Job:
         """Fetch a job by its ID from the JobManager API.

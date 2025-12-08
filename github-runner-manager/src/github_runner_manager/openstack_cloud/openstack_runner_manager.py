@@ -216,6 +216,8 @@ class OpenStackRunnerManager(CloudRunnerManager):
             dockerhub_mirror=service_config.dockerhub_mirror,
             ssh_debug_info=ssh_debug_info,
             runner_proxy_config=service_config.runner_proxy_config,
+            proxy_url=runner_context.proxy_url,
+            proxy_certificate=runner_context.proxy_certificate,
         )
 
     def _get_repo_policy_compliance_client(self) -> RepoPolicyComplianceClient | None:
