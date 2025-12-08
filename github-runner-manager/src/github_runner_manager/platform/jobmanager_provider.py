@@ -178,27 +178,15 @@ class JobManagerPlatform(PlatformProvider):
                 )
                 # For now, use the first label
                 label = "undefined" if not labels else labels[0]
-                
-                # Add proxy environment variables if proxy is configured
-                proxy_env = ""
-                if response.proxy:
-                    proxy_env = (
-                        f"HTTPS_PROXY={response.proxy.url} "
-                        f"HTTP_PROXY={response.proxy.url} "
-                    )
-                
                 command_to_run = (
                     f"BUILDER_LABEL={label} JOB_MANAGER_BEARER_TOKEN={token} "
                     f"JOB_MANAGER_API_ENDPOINT={jobmanager_endpoint} "
-                    f"{proxy_env}"
                     "builder-agent"
                 )
                 return (
                     RunnerContext(
                         shell_run_script=command_to_run,
                         ingress_tcp_ports=[8080],
-                        proxy_url=response.proxy.url if response.proxy else None,
-                        proxy_certificate=response.proxy.fetch_service_mitm_certificate if response.proxy else None,
                     ),
                     SelfHostedRunner(
                         identity=RunnerIdentity(
