@@ -165,8 +165,8 @@ class JobManagerAPI:
             logger.info("Job Farm runner registered: %s", response)
             if hasattr(response, "proxy") and response.proxy:
                 proxy = ProxyConfig(
-                    url=response.proxy.url,
-                    fetch_service_mitm_certificate=response.proxy.fetch_service_mitm_certificate,
+                    url=response.proxy["url"],
+                    fetch_service_mitm_certificate=response.proxy["fetch_service_mitm_certificate"],
                 )
 
             return RunnerRegistration(id=response.id, token=response.token, proxy=proxy)
