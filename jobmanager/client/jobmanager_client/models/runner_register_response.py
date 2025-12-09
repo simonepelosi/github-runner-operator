@@ -16,9 +16,7 @@ from __future__ import annotations
 import pprint
 import re  # noqa: F401
 import json
-
-
-
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field, StrictInt, StrictStr
 
 class RunnerRegisterResponse(BaseModel):
@@ -27,7 +25,8 @@ class RunnerRegisterResponse(BaseModel):
     """
     id: StrictInt = Field(...)
     token: StrictStr = Field(...)
-    __properties = ["id", "token"]
+    proxy: Optional[Dict[str, Any]] = None
+    __properties = ["id", "token", "proxy"]
 
     class Config:
         """Pydantic configuration"""
@@ -66,7 +65,8 @@ class RunnerRegisterResponse(BaseModel):
 
         _obj = RunnerRegisterResponse.parse_obj({
             "id": obj.get("id"),
-            "token": obj.get("token")
+            "token": obj.get("token"),
+            "proxy": obj.get("proxy")
         })
         return _obj
 
