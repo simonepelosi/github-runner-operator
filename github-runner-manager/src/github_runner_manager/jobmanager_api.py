@@ -8,7 +8,9 @@ import jobmanager_client
 from jobmanager_client.exceptions import ApiException, NotFoundException
 from pydantic import BaseModel
 from urllib3.exceptions import RequestError
+import logging
 
+logger = logging.getLogger(__name__)
 
 class JobManagerAPIError(Exception):
     """Base exception for JobManager API errors."""
@@ -160,7 +162,7 @@ class JobManagerAPI:
                 raise JobManagerAPIError(f"Error registering runner: {exc}") from exc
 
             proxy = None
-            print("Job Farm runner registered: %s", response)
+            logger.info("Job Farm runner registered: %s", response)
             if hasattr(response, "proxy") and response.proxy:
                 proxy = ProxyConfig(
                     url=response.proxy.url,
