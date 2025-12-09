@@ -160,7 +160,7 @@ class JobManagerAPI:
                 raise JobManagerAPIError(f"Error registering runner: {exc}") from exc
 
             proxy = None
-            logger.info("Job Farm runner registered: %s", response)
+            print("Job Farm runner registered: %s", response)
             if hasattr(response, "proxy") and response.proxy:
                 proxy = ProxyConfig(
                     url=response.proxy.url,
