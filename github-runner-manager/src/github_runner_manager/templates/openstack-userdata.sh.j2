@@ -46,32 +46,32 @@ su - ubuntu -c 'cd ~/actions-runner && echo "{{ env_contents }}" > .env'
 snap refresh --hold
 snap watch --last=auto-refresh?
 
-# {% if use_aproxy %}
-# snap install aproxy --edge
-# snap set aproxy proxy={{ aproxy_address }} listen=:54969
-# cat << EOF > /etc/nftables.conf
-# define default-ipv4 = $(ip route get $(ip route show 0.0.0.0/0 | grep -oP 'via \K\S+') | grep -oP 'src \K\S+')
-# table ip aproxy
-# flush table ip aproxy
-# table ip aproxy {
-#       set exclude {
-#           type ipv4_addr;
-#           flags interval; auto-merge;
-#           elements = { 127.0.0.0/8, {{ aproxy_exclude_ipv4_addresses }} }
-#       }
-#       chain prerouting {
-#               type nat hook prerouting priority dstnat; policy accept;
-#               ip daddr != @exclude tcp dport { {{ aproxy_redirect_ports }} } counter dnat to \$default-ipv4:54969
-#       }
-#       chain output {
-#               type nat hook output priority -100; policy accept;
-#               ip daddr != @exclude tcp dport { {{ aproxy_redirect_ports }} } counter dnat to \$default-ipv4:54969
-#       }
-# }
-# EOF
-# systemctl enable nftables.service
-# nft -f /etc/nftables.conf
-# {% endif %}
+{% if use_aproxy %}
+snap install aproxy --edge
+snap set aproxy proxy={{ aproxy_address }} listen=:54969
+cat << EOF > /etc/nftables.conf
+define default-ipv4 = $(ip route get $(ip route show 0.0.0.0/0 | grep -oP 'via \K\S+') | grep -oP 'src \K\S+')
+table ip aproxy
+flush table ip aproxy
+table ip aproxy {
+      set exclude {
+          type ipv4_addr;
+          flags interval; auto-merge;
+          elements = { 127.0.0.0/8, {{ aproxy_exclude_ipv4_addresses }} }
+      }
+      chain prerouting {
+              type nat hook prerouting priority dstnat; policy accept;
+              ip daddr != @exclude tcp dport { {{ aproxy_redirect_ports }} } counter dnat to \$default-ipv4:54969
+      }
+      chain output {
+              type nat hook output priority -100; policy accept;
+              ip daddr != @exclude tcp dport { {{ aproxy_redirect_ports }} } counter dnat to \$default-ipv4:54969
+      }
+}
+EOF
+systemctl enable nftables.service
+nft -f /etc/nftables.conf
+{% endif %}
 
 apt-get update
 
@@ -95,7 +95,7 @@ install_or_refresh() {
   fi
 }
 
-install_or_refresh snapd
+snap refresh snapd
 install_or_refresh lxd
 install_or_refresh sourcecraft --edge --classic
 install_or_refresh rockcraft --edge --classic
@@ -129,6 +129,13 @@ EOF
 
 adduser ubuntu lxd
 adduser ubuntu adm
+
+# {% if dockerhub_mirror %}
+# mkdir -p /etc/docker
+# echo "{\"registry-mirrors\": [\"{{ dockerhub_mirror }}\"]}" > /etc/docker/daemon.json
+# systemctl daemon-reload
+# systemctl restart docker
+# {% endif %}
 
 # Prepare metrics
 su - ubuntu -c 'mkdir "{{ metrics_exchange_path }}"'
