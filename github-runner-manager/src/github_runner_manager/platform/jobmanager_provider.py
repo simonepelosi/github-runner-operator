@@ -36,13 +36,15 @@ logger = logging.getLogger(__name__)
 class JobManagerPlatform(PlatformProvider):
     """Manage self-hosted runner on the JobManager."""
 
-    def __init__(self, jobmanager_api: JobManagerAPI):
+    def __init__(self, jobmanager_api: JobManagerAPI, runner_http_proxy: HttpUrl | None = None):
         """Construct the object.
 
         Args:
             jobmanager_api: The jobmanager API client to use.
+            runner_http_proxy: HTTP proxy to be used by the runner.
         """
         self._jobmanager_api = jobmanager_api
+        self._runner_http_proxy = runner_http_proxy
 
     @classmethod
     def build(cls, jobmanager_configuration: JobManagerConfiguration) -> "JobManagerPlatform":
@@ -58,6 +60,7 @@ class JobManagerPlatform(PlatformProvider):
             jobmanager_api=JobManagerAPI(
                 url=jobmanager_configuration.url, token=jobmanager_configuration.token
             ),
+            runner_http_proxy=jobmanager_configuration.runner_http_proxy,
         )
 
     def get_runner_health(
@@ -179,17 +182,28 @@ class JobManagerPlatform(PlatformProvider):
                 )
                 # For now, use the first label
                 label = "undefined" if not labels else labels[0]
+                proxy_url = (
+                    str(self._runner_http_proxy)
+                    if self._runner_http_proxy
+                    else ""
+                )
+                proxy_certificate = (
+                    response.proxy.fetch_service_mitm_certificate
+                    if response.proxy
+                    else None
+                )
                 command_to_run = (
                     f"BUILDER_LABEL={label} JOB_MANAGER_BEARER_TOKEN={token} "
                     f"JOB_MANAGER_API_ENDPOINT={jobmanager_endpoint} "
+                    f"BUILDER_PROXY={proxy_url} "
                     "builder-agent"
                 )
                 return (
                     RunnerContext(
                         shell_run_script=command_to_run,
                         ingress_tcp_ports=[8080],
-                        proxy_url=response.proxy.url if response.proxy else None,
-                        proxy_certificate=response.proxy.fetch_service_mitm_certificate if response.proxy else None,
+                        proxy_url=proxy_url or None,
+                        proxy_certificate=proxy_certificate,
                     ),
                     SelfHostedRunner(
                         identity=RunnerIdentity(

@@ -11,7 +11,9 @@ class JobManagerConfiguration(BaseModel):
     Attributes:
        url: Base url of the job manager API.
       token: Token to authenticate with the job manager API.
+      runner_http_proxy: HTTP proxy to be used by the runner.
     """
 
     url: HttpUrl
     token: str
+    runner_http_proxy: HttpUrl | None = None

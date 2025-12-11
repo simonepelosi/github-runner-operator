@@ -74,7 +74,11 @@ def create_application_configuration(
     )
     jobmanager_configuration = (
         JobManagerConfiguration(
-            url=state.charm_config.jobmanager_url, token=state.charm_config.jobmanager_token
+            url=state.charm_config.jobmanager_url,
+            token=state.charm_config.jobmanager_token,
+            runner_http_proxy=state.runner_proxy_config.http
+            if state.runner_proxy_config
+            else None,
         )
         if state.charm_config.jobmanager_url
         else None
