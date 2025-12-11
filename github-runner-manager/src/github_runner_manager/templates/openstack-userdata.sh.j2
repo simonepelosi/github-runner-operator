@@ -95,7 +95,7 @@ install_or_refresh() {
   fi
 }
 
-snap refresh snapd
+install_or_refresh snapd
 install_or_refresh lxd
 install_or_refresh sourcecraft --edge --classic
 install_or_refresh rockcraft --edge --classic
@@ -129,13 +129,6 @@ EOF
 
 adduser ubuntu lxd
 adduser ubuntu adm
-
-# {% if dockerhub_mirror %}
-# mkdir -p /etc/docker
-# echo "{\"registry-mirrors\": [\"{{ dockerhub_mirror }}\"]}" > /etc/docker/daemon.json
-# systemctl daemon-reload
-# systemctl restart docker
-# {% endif %}
 
 # Prepare metrics
 su - ubuntu -c 'mkdir "{{ metrics_exchange_path }}"'
